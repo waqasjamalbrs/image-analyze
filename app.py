@@ -64,7 +64,7 @@ if analyze_btn:
                         "type": "input_image",
                         "input_image": {
                             "type": "base64",
-                            "data": base64_image
+                            "data": [base64_image]        # ← YEH FIX HAI (array mein wrap!)
                         }
                     },
                     {
@@ -82,8 +82,8 @@ if analyze_btn:
                 stream=False,
                 temperature=0.7,
                 max_tokens=4096,
-                extra_body={                  # ← Yeh line error fix karti hai
-                    "output_modalities": ["text"]   # sirf text output chahiye (audio nahi)
+                extra_body={
+                    "output_modalities": ["text"]
                 }
             )
             
@@ -96,7 +96,7 @@ if analyze_btn:
             
         except Exception as e:
             st.error(f"Error: {str(e)}")
-            st.info("Tips: API key check karo, quota bacha hai? (free 5M tokens daily)")
+            st.info("Tips: API key sahi hai? Daily free quota (500K tokens) bacha hai?")
 
 st.divider()
-st.caption("LongCat-Flash-Omni-2603 Ready | GitHub pe push + Streamlit Cloud deploy")
+st.caption("LongCat-Flash-Omni-2603 | GitHub + Streamlit Cloud ready")
