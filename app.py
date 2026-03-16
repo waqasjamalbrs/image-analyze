@@ -6,30 +6,27 @@ st.set_page_config(page_title="LongCat-Flash-Omni-2603 Image Analyzer", layout="
 st.title("🔥 LongCat-Flash-Omni-2603 Image Analyzer")
 st.caption("Meituan LongCat Omni Model - Upload image + prompt = instant analysis")
 
-# API Key input (pehle baar save ho jayega session mein)
+# API Key
 if "api_key" not in st.session_state:
     st.session_state.api_key = ""
 
 api_key = st.text_input(
-    "LongCat API Key (Bearer wala nahi, sirf key)",
+    "LongCat API Key",
     value=st.session_state.api_key,
     type="password",
-    help="https://longcat.chat/platform/api_keys se lo (free quota milta hai)"
+    help="https://longcat.chat/platform/api_keys se lo"
 )
 if api_key:
     st.session_state.api_key = api_key
 
-# Image upload
 uploaded_file = st.file_uploader(
-    "Image upload karo (JPG, PNG, WEBP, etc.)",
-    type=["jpg", "jpeg", "png", "webp", "bmp", "tiff"],
-    help="Direct upload → base64 mein convert hoga"
+    "Image upload karo (JPG, PNG, WEBP, BMP, TIFF)",
+    type=["jpg", "jpeg", "png", "webp", "bmp", "tiff"]
 )
 
-# Prompt
 prompt = st.text_area(
-    "Prompt likho (kuch bhi pooch sakte ho)",
-    placeholder="Yeh image mein kya ho raha hai? Step by step explain karo...",
+    "Prompt likho",
+    placeholder="Yeh image mein kya ho raha hai? Detail mein batao...",
     height=100
 )
 
@@ -37,7 +34,7 @@ analyze_btn = st.button("🚀 Analyze with LongCat-Flash-Omni-2603", type="prima
 
 if analyze_btn:
     if not api_key:
-        st.error("API Key daalo pehle!")
+        st.error("API Key daalo!")
         st.stop()
     if not uploaded_file:
         st.error("Image upload karo!")
@@ -46,12 +43,10 @@ if analyze_btn:
         st.error("Prompt likho!")
         st.stop()
 
-    with st.spinner("LongCat-Flash-Omni-2603 soch raha hai... (Omni model hai, thoda time lag sakta hai)"):
-        # Image ko base64 mein convert
+    with st.spinner("LongCat-Flash-Omni-2603 analyze kar raha hai..."):
         image_bytes = uploaded_file.read()
         base64_image = base64.b64encode(image_bytes).decode("utf-8")
 
-        # OpenAI client (LongCat base URL)
         client = OpenAI(
             base_url="https://api.longcat.chat/openai",
             api_key=api_key
@@ -68,7 +63,7 @@ if analyze_btn:
                     {
                         "type": "input_image",
                         "input_image": {
-                            "type": "base64",          # base64 support confirmed
+                            "type": "base64",
                             "data": base64_image
                         }
                     },
@@ -84,10 +79,12 @@ if analyze_btn:
             response = client.chat.completions.create(
                 model="LongCat-Flash-Omni-2603",
                 messages=messages,
-                output_modalities=["text"],   # sirf text chahiye
                 stream=False,
                 temperature=0.7,
-                max_tokens=4096
+                max_tokens=4096,
+                extra_body={                  # ← Yeh line error fix karti hai
+                    "output_modalities": ["text"]   # sirf text output chahiye (audio nahi)
+                }
             )
             
             result = response.choices[0].message.content
@@ -95,13 +92,11 @@ if analyze_btn:
             st.markdown("### 📸 Analysis Result")
             st.markdown(result)
             
-            # Original image preview
             st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
             
         except Exception as e:
             st.error(f"Error: {str(e)}")
-            st.info("Tips: API key sahi hai? Quota bacha hai? (daily free 5M tokens)")
+            st.info("Tips: API key check karo, quota bacha hai? (free 5M tokens daily)")
 
-# Footer
 st.divider()
-st.caption("Made for LongCat-Flash-Omni-2603 | GitHub pe daal do aur Streamlit Cloud pe deploy karo 🚀")
+st.caption("LongCat-Flash-Omni-2603 Ready | GitHub pe push + Streamlit Cloud deploy")
